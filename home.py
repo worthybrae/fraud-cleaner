@@ -34,13 +34,15 @@ def calculate_haversine_distance(lat1, lon1, lat2, lon2):
         return haversine(point1, point2, unit=Unit.METERS)
     except:
         return 0
+    
+st.title('data cleaner')
 
 # Upload the file
-uploaded_file = st.file_uploader("upload results", type=["csv", "xlsx"])
+uploaded_file = st.file_uploader("upload results file", type=["csv", "xlsx"])
 
 on = st.toggle("hash device ids")
 
-if uploaded_file:
+if st.button('analyze'):
     # Read the file into a dataframe
     with st.spinner('reading csv file...'):
         if uploaded_file.name.endswith('.csv'):
@@ -146,25 +148,35 @@ if uploaded_file:
         
         grouped_df = grouped_df[['id', 'latitude', 'longitude', 'timestamp', 'prev_latitude', 'prev_longitude', 'prev_timestamp', 'is_replay', 'is_stacking', 'is_teleporting', 'is_ip_derived', 'is_legit']]
 
-        filtered_df = grouped_df[grouped_df['is_legit']]
-
-
         if on:
-            filtered_df['id'] = filtered_df['id'].apply(hash_device_id)  
+            grouped_df['id'] = grouped_df['id'].apply(hash_device_id)
+
+        filtered_df = grouped_df[grouped_df['is_legit']]
+        bad_df = grouped_df[grouped_df['is_legit'] == False]
 
         # Convert DataFrame to CSV
-        csv = filtered_df.to_csv(index=False)   
+        csv = filtered_df.to_csv(index=False) 
+        bad_csv = bad_df.to_csv(index=False)   
 
     # Display the grouped data
     st.dataframe(grouped_df)
 
     # Download button
     st.download_button(
-        label="get filtered data",
+        label="get clean data",
         data=csv,
         file_name='filtered_data.csv',
         mime='text/csv'
     )
+
+    st.download_button(
+        label="get bad data",
+        data=csv,
+        file_name='filtered_data.csv',
+        mime='text/csv'
+    )
+
+
 
                     
 
