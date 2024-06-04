@@ -125,8 +125,6 @@ if st.button('analyze'):
         grouped_df['prev_longitude'] = grouped_df.groupby('id')['longitude'].shift(1)
         grouped_df['prev_timestamp'] = grouped_df.groupby('id')['timestamp'].shift(1)
 
-
-
         grouped_df['time_diff_minutes'] = (grouped_df['timestamp'] - grouped_df['prev_timestamp']).dt.total_seconds() / 60
 
         # Calculate the distance in km
@@ -153,6 +151,14 @@ if st.button('analyze'):
 
         filtered_df = grouped_df[grouped_df['is_legit']]
         bad_df = grouped_df[grouped_df['is_legit'] == False]
+
+        filtered_df['prev_latitude'] = filtered_df.groupby('id')['latitude'].shift(1)
+        filtered_df['prev_longitude'] = filtered_df.groupby('id')['longitude'].shift(1)
+        filtered_df['prev_timestamp'] = filtered_df.groupby('id')['timestamp'].shift(1)
+
+        bad_df['prev_latitude'] = bad_df.groupby('id')['latitude'].shift(1)
+        bad_df['prev_longitude'] = bad_df.groupby('id')['longitude'].shift(1)
+        bad_df['prev_timestamp'] = bad_df.groupby('id')['timestamp'].shift(1)
 
         # Convert DataFrame to CSV
         csv = filtered_df.to_csv(index=False) 
