@@ -36,7 +36,9 @@ def calculate_haversine_distance(lat1, lon1, lat2, lon2):
         return 0
 
 # Upload the file
-uploaded_file = st.file_uploader("Upload H4 Results", type=["csv", "xlsx"])
+uploaded_file = st.file_uploader("upload results", type=["csv", "xlsx"])
+
+on = st.toggle("hash device ids")
 
 if uploaded_file:
     # Read the file into a dataframe
@@ -146,7 +148,9 @@ if uploaded_file:
 
         filtered_df = grouped_df[grouped_df['is_legit']]
 
-        filtered_df['id'] = filtered_df['id'].apply(hash_device_id)  
+
+        if on:
+            filtered_df['id'] = filtered_df['id'].apply(hash_device_id)  
 
         # Convert DataFrame to CSV
         csv = filtered_df.to_csv(index=False)   
