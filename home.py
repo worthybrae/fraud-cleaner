@@ -5,6 +5,9 @@ import hashlib
 import geohash
 
 
+def hash_device_id(device_id):
+    return hashlib.sha256(device_id.encode()).hexdigest()
+
 def calculate_truncation(val):
     digits = len(str(val))
     if -180 <= val <= -100:
@@ -142,6 +145,8 @@ if uploaded_file:
         grouped_df = grouped_df[['id', 'latitude', 'longitude', 'timestamp', 'prev_latitude', 'prev_longitude', 'prev_timestamp', 'is_replay', 'is_stacking', 'is_teleporting', 'is_ip_derived', 'is_legit']]
 
         filtered_df = grouped_df[grouped_df['is_legit']]
+
+        filtered_df['id'] = filtered_df['id'].apply(hash_device_id)  
 
         # Convert DataFrame to CSV
         csv = filtered_df.to_csv(index=False)   
