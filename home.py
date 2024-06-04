@@ -55,7 +55,7 @@ if st.button('analyze'):
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df['truncated_timestamp_minute'] = df['timestamp'].dt.floor('min')
 
-    with st.spinner('analyzing device bahevior...'):
+    with st.spinner('analyzing device behavior...'):
         if 'supply_id' in df.columns:
             # Group by id and truncated timestamp value to get the required aggregations
             grouped_df = df.groupby(['id', 'truncated_timestamp_minute']).agg(
@@ -171,7 +171,7 @@ if st.button('analyze'):
 
     st.download_button(
         label="get bad data",
-        data=csv,
+        data=bad_csv,
         file_name='filtered_data.csv',
         mime='text/csv'
     )
