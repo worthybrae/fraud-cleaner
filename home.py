@@ -10,6 +10,8 @@ def is_valid_uuid(uuid_to_test, version=4):
     match = re.fullmatch(regex, uuid_to_test)
     return bool(match)
 
+st.set_page_config(page_title='Elvira Lite')
+
 st.title('elvira lite')
 
 if 'authenticated' not in st.session_state:
