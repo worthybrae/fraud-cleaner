@@ -252,34 +252,25 @@ if password == st.secrets["password"]:
                         case when (max_speed < 25 or min_range > 120) and total_seg_locs > 10 then 0 else 1 end as is_teleporting
                     from
                         enri_data
-                ), hui_data as (
-                    select
-                        supply_id,
-                        id,
-                        datetime,
-                        main_latitude,
-                        main_longitude,
-                        country,
-                        created_at,
-                    from
-                        enric_data
-                    where
-                        is_conflicted = 0 and
-                        is_late = 0 and
-                        is_stacked = 0 and
-                        is_dupe = 0 and
-                        is_replay = 0 and
-                        is_infected = 0 and
-                        is_teleporting = 0
                 )
                 select
-                    *,
-                    lag(main_latitude) over (partition by id order by datetime) as prev_latitude,
-                    lag(main_longitude) over (partition by id order by datetime) as prev_longitude,
+                    supply_id,
+                    id,
+                    datetime,
+                    main_latitude,
+                    main_longitude,
+                    country,
+                    created_at,
+                    is_conflicted,
+                    is_late,
+                    is_stacked,
+                    is_dupe,
+                    is_replay,
+                    is_infected,
+                    is_teleporting
                 from
-                    hui_data
-                order by
-                    datetime
+                    enric_data
+                
             """
             results = query_snowflake(
                 query, 
@@ -292,7 +283,23 @@ if password == st.secrets["password"]:
             )
         results_df = pd.DataFrame(results[1:], columns=results[0])
         st.dataframe(results_df)
-        results_csv = results_df.to_csv(index=False).encode('utf-8')
+        columns_to_check = [
+            'IS_CONFLICTED',
+            'IS_LATE',
+            'IS_STACKED',
+            'IS_DUPE',
+            'IS_REPLAY',
+            'IS_INFECTED',
+            'IS_TELEPORTING'
+        ]
+        # Create a condition to filter out rows with 1 in any of the specified columns
+        condition = results_df[columns_to_check].ne(1).all(axis=1)
+
+        # Filter the DataFrame
+        filtered_df = results_df[condition]
+        filtered_df['PREV_LATITUDE'] = filtered_df['MAIN_LATITUDE'].shift(1)
+        filtered_df['PREV_LONGITUDE'] = filtered_df['MAIN_LONGITUDE'].shift(1)
+        results_csv = filtered_df.to_csv(index=False).encode('utf-8')
         st.download_button(
             label="clean data",
             data=results_csv,
